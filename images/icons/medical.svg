@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Medical">
+  <g fill="none" stroke="#7402A0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="6" y="16" width="36" height="24" rx="4"/>
+    <path d="M17 16v-2.5A3.5 3.5 0 0 1 20.5 10h7A3.5 3.5 0 0 1 31 13.5V16"/>
+    <path d="M24 23.5v8.5"/>
+    <path d="M19.75 27.75h8.5"/>
+  </g>
+</svg>

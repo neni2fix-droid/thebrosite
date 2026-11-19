@@ -108,6 +108,9 @@ const SITE_DATA = {
     verified: false,
     statement:
       "We do not publish numbers until they have been verified. What we can commit to is the way we work: alongside the community, in the open, with the goal of lasting change. Verified figures and reports will be published here once they are available.",
+    // Populate and set verified:true only after the foundation supplies and signs off figures.
+    // stats: [{ icon: "volunteers|donations|projects|missions", value: "100+", label: "Volunteers" }, ...]
+    stats: [],
   },
 };
 

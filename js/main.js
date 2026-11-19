@@ -28,10 +28,41 @@ const prefersReducedMotion =
 
 /* ---------- Content rendering ---------- */
 function renderImpact() {
-  const el = document.getElementById("impact-statement");
-  if (el && data.impact && data.impact.statement) {
-    el.textContent = data.impact.statement;
+  const stats = document.getElementById("stats");
+  const note = document.getElementById("impact-note");
+  const impact = data.impact || {};
+
+  if (!stats) return;
+
+  if (impact.verified && Array.isArray(impact.stats) && impact.stats.length) {
+    const icons = {
+      volunteers:
+        '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path d="M16.5 18.5a5 5 0 0 0-9 0M12 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm7 6.5a4.5 4.5 0 0 0-4-4.4M1.5 19a4.5 4.5 0 0 1 4-4.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+      donations:
+        '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path d="M12 20c-4.4-2.4-8-5.5-8-9.1a4.3 4.3 0 0 1 8-1.8 4.3 4.3 0 0 1 8 1.8c0 3.6-3.6 6.7-8 9.1Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
+      projects:
+        '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path d="m12 3 9 5-9 5-9-5 9-5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M3 13.5 12 18.5l9-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
+      missions:
+        '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path d="M6 4v16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M6 5h12l-2.5 4L18 13H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
+    };
+
+    stats.innerHTML = impact.stats
+      .map(
+        (item) => `
+        <div class="stat reveal">
+          <span class="stat__icon">${icons[item.icon] || icons.projects}</span>
+          <span>
+            <span class="stat__value">${esc(item.value)}</span>
+            <span class="stat__label">${esc(item.label)}</span>
+          </span>
+        </div>`
+      )
+      .join("");
+    if (note) note.style.display = "none";
+    return;
   }
+
+  stats.style.display = "none";
 }
 
 function renderEvents() {

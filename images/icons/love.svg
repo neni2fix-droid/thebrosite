@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Love and care">
+  <g fill="none" stroke="#7402A0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M24 12.5a5.5 5.5 0 0 1 11 0 5.5 5.5 0 0 1-11 0Z"/>
+    <path d="M4 29.5a4 4 0 0 1 4-4h4.4"/>
+    <path d="M40 29.5a4 4 0 0 0-4-4h-4.4"/>
+    <path d="M4 29.5v6a3 3 0 0 0 3 3h7.6a4 4 0 0 0 2.4-.8l5.7-4.3 5.7 4.3a4 4 0 0 0 2.4.8H41a3 3 0 0 0 3-3v-6a4 4 0 0 0-4-4h-8a5.5 5.5 0 0 0-4.5 2.5L24 30l-3.5-2.5A5.5 5.5 0 0 0 16 25.5H8a4 4 0 0 0-4 4Z"/>
+  </g>
+</svg>
