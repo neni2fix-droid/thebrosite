@@ -33,12 +33,18 @@ index.html              Page markup (structure only — content is rendered from
 css/styles.css          All styles, brand tokens in :root, mobile-first
 js/data.js              ALL editable content: events, news, donation, contact, impact
 js/main.js              Menu, scroll reveal, rendering, form validation, dynamic year
-images/logo.svg         Logo (placeholder — replace with the official artwork)
-images/placeholder-*.svg  Photo placeholders — replace with real photographs
+images/logo-header.png  Header wordmark, recoloured fully violet
+images/logo-white.png   Footer wordmark (white, for the violet background)
+images/hero.webp        Hero photograph (real outreach photo)
+images/campaign.jpg     "Save A Child" photograph (real outreach photo)
+images/fieldwork-team.jpg  About-section photograph (real outreach photo)
+images/icons/*.svg      Violet programme icons
 images/favicon.svg      Favicon
 robots.txt              Crawler rules
 README.md               This file
 ```
+
+There is **no build step, no framework and no npm dependency**. The site is static HTML, CSS and vanilla JS.
 
 ---
 
@@ -169,6 +175,73 @@ These items were **not** supplied or could **not** be verified during this build
 
 ---
 
-## 9. Honest status
+## 9. Analytics (Cloudflare Web Analytics)
 
-This code has **not been deployed**. It was written and statically reviewed locally; it has not been formally tested across every browser or device, and no live form submissions have been made. Please run the launch checklist above, test the form with the real endpoint, and check the site on a real phone before announcing it.
+Visitor analytics uses **Cloudflare Web Analytics** — free, cookie-free, and privacy-first. There is no Google Analytics, no custom analytics backend, no database, and no third-party tracking.
+
+The beacon is installed manually at the end of `index.html`, just before `</body>`:
+
+```html
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "9fed42155f2a4f82811bab7c88fc7d90"}'></script>
+```
+
+- `defer` means it never blocks page rendering.
+- The token `9fed42155f2a4f82811bab7c88fc7d90` is the real site token issued by Cloudflare Web Analytics for the host `thebrosite.pages.dev`.
+- **Install it once only.** If the Cloudflare dashboard ever offers automatic setup for this host, remove this manual snippet first, otherwise page views would be counted twice.
+- Automatic setup was **not** available for this `pages.dev` host, which is why the manual snippet is used.
+
+**If a Content-Security-Policy is ever added,** it must allow the beacon or analytics will be silently blocked:
+
+```
+script-src  ... https://static.cloudflareinsights.com;
+connect-src ... https://cloudflareinsights.com;
+```
+
+There is currently **no CSP** on this site (no `_headers` file, no meta tag), so nothing needed changing.
+
+**Enabling / viewing the data in Cloudflare:**
+
+1. Sign in to <https://dash.cloudflare.com>.
+2. Go to **Analytics & Logs → Web Analytics** (or open the account → *Web Analytics*).
+3. Under **Manage** you should see `thebrosite.pages.dev` listed with token `9fed42…7d90`.
+4. Open it to see visitors, page views, top pages, referrers, countries and Core Web Vitals.
+
+To register a different host later: **Web Analytics → Add a site →** enter the hostname → **Manual setup** shows the same style of snippet with that site's token.
+
+**Verifying real data is arriving:**
+
+1. Visit <https://thebrosite.pages.dev> in a browser with tracking protection **off** for that domain (ad blockers and some privacy modes block the beacon).
+2. Open DevTools → **Network**, filter for `beacon`, and confirm a request to `https://cloudflareinsights.com/cdn-cgi/rum` returns **200/204**.
+3. In the dashboard the visit appears within a few minutes; aggregate charts can take longer to populate.
+4. Confirm the browser console shows **no** errors from the beacon — a blocked or mis-tokened beacon shows as a failed `rum` request, not a JS error.
+
+The beacon does **not** collect passwords or form contents, and this site sends nothing from the enquiry form to analytics.
+
+---
+
+## 10. Deployment
+
+Deployed and verified from this source tree:
+
+| Host | URL |
+|---|---|
+| Cloudflare Pages (project `thebrosite`) | https://thebrosite.pages.dev |
+| Netlify (site `thebrosite`) | https://thebrosite.netlify.app |
+| Hostinger (subdomain) | https://thebro.nenifix.com |
+| GitHub | https://github.com/neni2fix-droid/thebrosite |
+
+Cloudflare redeploy, from the project directory:
+
+```bash
+npx wrangler pages deploy . --project-name=thebrosite --branch=main
+```
+
+---
+
+## 11. Honest status
+
+This site **is deployed** to Cloudflare Pages, Netlify and Hostinger, and the Cloudflare Web Analytics beacon is live and confirmed present in the served HTML.
+
+What has **not** been done: no formal cross-browser or multi-device test pass, no real enquiry-form submission (the form endpoint is still unset), and no verified visitor data has been reviewed yet — analytics was only just enabled. Please work through the launch checklist in section 7 before announcing the site.
+
+**Important:** the foundation's real photographs are now in use. Confirm written consent for any identifiable children or adults pictured before the site is promoted publicly.
