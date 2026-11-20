@@ -364,7 +364,12 @@
     </div>
   </footer>
 
-  <!-- Cloudflare Web Analytics (privacy-first, no cookies). Deferred so it never blocks rendering. -->
-  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "b17e6faebc1e4149b0eeb55477607bd0"}'></script>
+  <!--
+    Web Analytics note: Cloudflare injects its tracking script automatically
+    for the proxied production domain (thebrothersfoundation.org), so no
+    analytics script is added here on purpose. Adding one manually would
+    produce two beacons and double-count every page view.
+    See README section 9.
+  -->
 </body>
 </html>

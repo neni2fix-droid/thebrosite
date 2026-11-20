@@ -179,17 +179,15 @@ These items were **not** supplied or could **not** be verified during this build
 
 Visitor analytics uses **Cloudflare Web Analytics** — free, cookie-free, and privacy-first. There is no Google Analytics, no custom analytics backend, no database, and no third-party tracking.
 
-The beacon is installed manually at the end of `index.html`, just before `</body>`:
+The beacon is **not** in the source. Cloudflare injects its Web Analytics script automatically at the edge for the proxied production domain, and the served HTML contains exactly one beacon:
 
 ```html
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "b17e6faebc1e4149b0eeb55477607bd0"}'></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/..." data-cf-beacon='{"version":"2024.11.0","token":"f0dc92c09fee4ae8a192c018e8b99838",...}'>
 ```
 
-- `defer` means it never blocks page rendering.
-- The token `b17e6faebc1e4149b0eeb55477607bd0` is the real site token issued by Cloudflare Web Analytics for the production host `thebrothersfoundation.org`.
-- **Install it once only.** If the Cloudflare dashboard ever offers automatic setup for this host, remove this manual snippet first, otherwise page views would be counted twice.
-- Automatic setup was **not** available for this host, which is why the manual snippet is used.
-- An earlier token (`9fed42…7d90`) belongs to the old `thebrosite.pages.dev` host and was replaced so analytics attribute to the real domain.
+- **Do not add a manual snippet to `index.html`.** Doing so produced two beacons (verified during this migration) and double-counts every page view. That is why the source contains only a comment explaining the omission.
+- Automatic injection only happens on the proxied domain. The `pages.dev`, Netlify and Hostinger copies have no beacon — they are mirrors, not the production site, so this is intentional.
+- Web Analytics sites registered in the account: `thebrothersfoundation.org` (site token `b17e6faebc1e4149b0eeb55477607bd0`) and the legacy `thebrosite.pages.dev` (token `9fed42…7d90`). These were used for the manual snippet before automatic injection took over.
 
 **If a Content-Security-Policy is ever added,** it must allow the beacon or analytics will be silently blocked:
 
