@@ -182,13 +182,14 @@ Visitor analytics uses **Cloudflare Web Analytics** — free, cookie-free, and p
 The beacon is installed manually at the end of `index.html`, just before `</body>`:
 
 ```html
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "9fed42155f2a4f82811bab7c88fc7d90"}'></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "b17e6faebc1e4149b0eeb55477607bd0"}'></script>
 ```
 
 - `defer` means it never blocks page rendering.
-- The token `9fed42155f2a4f82811bab7c88fc7d90` is the real site token issued by Cloudflare Web Analytics for the host `thebrosite.pages.dev`.
+- The token `b17e6faebc1e4149b0eeb55477607bd0` is the real site token issued by Cloudflare Web Analytics for the production host `thebrothersfoundation.org`.
 - **Install it once only.** If the Cloudflare dashboard ever offers automatic setup for this host, remove this manual snippet first, otherwise page views would be counted twice.
-- Automatic setup was **not** available for this `pages.dev` host, which is why the manual snippet is used.
+- Automatic setup was **not** available for this host, which is why the manual snippet is used.
+- An earlier token (`9fed42…7d90`) belongs to the old `thebrosite.pages.dev` host and was replaced so analytics attribute to the real domain.
 
 **If a Content-Security-Policy is ever added,** it must allow the beacon or analytics will be silently blocked:
 
@@ -203,14 +204,14 @@ There is currently **no CSP** on this site (no `_headers` file, no meta tag), so
 
 1. Sign in to <https://dash.cloudflare.com>.
 2. Go to **Analytics & Logs → Web Analytics** (or open the account → *Web Analytics*).
-3. Under **Manage** you should see `thebrosite.pages.dev` listed with token `9fed42…7d90`.
+3. Under **Manage** you should see `thebrothersfoundation.org` listed with token `b17e6f…7bd0`.
 4. Open it to see visitors, page views, top pages, referrers, countries and Core Web Vitals.
 
 To register a different host later: **Web Analytics → Add a site →** enter the hostname → **Manual setup** shows the same style of snippet with that site's token.
 
 **Verifying real data is arriving:**
 
-1. Visit <https://thebrosite.pages.dev> in a browser with tracking protection **off** for that domain (ad blockers and some privacy modes block the beacon).
+1. Visit <https://thebrothersfoundation.org> in a browser with tracking protection **off** for that domain (ad blockers and some privacy modes block the beacon).
 2. Open DevTools → **Network**, filter for `beacon`, and confirm a request to `https://cloudflareinsights.com/cdn-cgi/rum` returns **200/204**.
 3. In the dashboard the visit appears within a few minutes; aggregate charts can take longer to populate.
 4. Confirm the browser console shows **no** errors from the beacon — a blocked or mis-tokened beacon shows as a failed `rum` request, not a JS error.
@@ -219,16 +220,24 @@ The beacon does **not** collect passwords or form contents, and this site sends 
 
 ---
 
-## 10. Deployment
+## 10. Domains and deployment
 
-Deployed and verified from this source tree:
+**Production domain: https://thebrothersfoundation.org** (Cloudflare Pages project `thebrosite`).
 
-| Host | URL |
-|---|---|
-| Cloudflare Pages (project `thebrosite`) | https://thebrosite.pages.dev |
-| Netlify (site `thebrosite`) | https://thebrosite.netlify.app |
-| Hostinger (subdomain) | https://thebro.nenifix.com |
-| GitHub | https://github.com/neni2fix-droid/thebrosite |
+| Host | URL | Notes |
+|---|---|---|
+| **Cloudflare Pages (primary)** | **https://thebrothersfoundation.org** | Custom domain, verified live |
+| Cloudflare Pages (www) | https://www.thebrothersfoundation.org | 301 redirects to the apex |
+| Cloudflare Pages (default) | https://thebrosite.pages.dev | Still serves the same build |
+| Netlify | https://thebrosite.netlify.app | Same files |
+| Hostinger | https://thebro.nenifix.com | Same files |
+| GitHub | https://github.com/neni2fix-droid/thebrosite | Source |
+
+Canonical, Open Graph, Twitter and JSON-LD URLs all point at `https://thebrothersfoundation.org`. `sitemap.xml` and `robots.txt` reference the same domain.
+
+**DNS:** the apex has a proxied `CNAME` to `thebrosite.pages.dev` (Cloudflare flattens it at the apex), and `www` is a proxied `CNAME` to the same target. A zone-level redirect rule sends `www` to the apex with a 301, and Cloudflare's "Always Use HTTPS" sends `http` to `https`. **Mail records (MX, SPF, DMARC, DKIM, autodiscover) were left untouched.**
+
+**First `www` redirect on Pages** is also declared in `_redirects`; the zone rule is what actually enforces it because the zone proxy handles requests before they reach Pages.
 
 Cloudflare redeploy, from the project directory:
 
@@ -240,8 +249,10 @@ npx wrangler pages deploy . --project-name=thebrosite --branch=main
 
 ## 11. Honest status
 
-This site **is deployed** to Cloudflare Pages, Netlify and Hostinger, and the Cloudflare Web Analytics beacon is live and confirmed present in the served HTML.
+The site **is live at https://thebrothersfoundation.org**, and the custom-domain attachment is confirmed `status=active` for both the apex and `www`. Verified by direct request: page 200, correct title, canonical and OG tags on the production domain, all 16 assets 200, exactly one analytics beacon with the production token, `http → https` 301, and `www → apex` 301.
 
-What has **not** been done: no formal cross-browser or multi-device test pass, no real enquiry-form submission (the form endpoint is still unset), and no verified visitor data has been reviewed yet — analytics was only just enabled. Please work through the launch checklist in section 7 before announcing the site.
+What has **not** been done: no formal cross-browser or multi-device test pass, no real enquiry-form submission (the form endpoint is still unset), and no analytics data reviewed yet. Please work through the launch checklist in section 7 before announcing the site.
+
+**Important — the old site was replaced.** `thebrothersfoundation.org` previously served the WordPress site hosted on Hostinger. Pointing the domain at Cloudflare Pages superseded it; that WordPress installation still exists at Hostinger and can be restored by reverting the DNS records if needed. The old apex A/AAAA records and the old `www` CNAME target were: `212.1.212.231`, `195.35.60.253`, `2a02:4780:1d:c477:4032:af8b:529c:979d`, `2a02:4780:22:621f:420b:3903:bf52:710c`, and `www.thebrothersfoundation.org.cdn.hstgr.net`.
 
 **Important:** the foundation's real photographs are now in use. Confirm written consent for any identifiable children or adults pictured before the site is promoted publicly.
