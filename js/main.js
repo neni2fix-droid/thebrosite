@@ -1,15 +1,22 @@
 "use strict";
 
 /* ============================================================
-   FORM ENDPOINT — SET THIS BEFORE LAUNCH
+   FORM ENDPOINT
    ------------------------------------------------------------
-   1. Create a free form at https://formspree.io
-   2. Copy your endpoint, e.g. "https://formspree.io/f/abcdwxyz"
-   3. Paste it below, replacing the placeholder.
-   While the placeholder is present the form will not send and
-   will show a clear, honest message to visitors instead.
+   Enquiries are delivered by FormSubmit (https://formsubmit.co)
+   to godwintext@gmail.com. No account or API key is needed.
+
+   IMPORTANT — one-time activation:
+   The FIRST time the form is submitted, FormSubmit sends a
+   confirmation link to that inbox. Somebody must open that
+   email and click the link before any further enquiries are
+   delivered. Until then submissions are accepted but dropped.
+
+   To switch providers later, change FORM_ENDPOINT only; the
+   submit handler below posts the same FormData to whatever URL
+   is set here.
    ============================================================ */
-const FORM_ENDPOINT = "https://formspree.io/f/REPLACE_ME";
+const FORM_ENDPOINT = "https://formsubmit.co/ajax/godwintext@gmail.com";
 
 /* ---------- Helpers ---------- */
 const esc = (value) =>
@@ -339,7 +346,7 @@ function initForm() {
       return;
     }
 
-    if (/REPLACE_ME/i.test(FORM_ENDPOINT)) {
+    if (!FORM_ENDPOINT) {
       setStatus(
         `The enquiry form is not connected yet. ${fallbackContact}`,
         "error"
@@ -354,14 +361,31 @@ function initForm() {
     const timeout = window.setTimeout(() => controller.abort(), 15000);
 
     try {
+      const payload = new FormData(form);
+      /* Drop the honeypot so it is never stored as a field. */
+      payload.delete("company");
+      payload.append("_subject", "New enquiry from thebrothersfoundation.org");
+      payload.append("_template", "table");
+      payload.append("_captcha", "false");
+
       const response = await fetch(FORM_ENDPOINT, {
         method: "POST",
-        body: new FormData(form),
+        body: payload,
         headers: { Accept: "application/json" },
         signal: controller.signal,
       });
 
       if (!response.ok) throw new Error(`Form endpoint responded ${response.status}`);
+
+      /* FormSubmit answers 200 with { success: "true" | "false" }. */
+      let accepted = true;
+      try {
+        const result = await response.json();
+        if (result && String(result.success) === "false") accepted = false;
+      } catch (parseError) {
+        /* A non-JSON body on a 2xx is still treated as accepted. */
+      }
+      if (!accepted) throw new Error("Form endpoint rejected the submission");
 
       form.reset();
       names.forEach((name) => setError(name, ""));

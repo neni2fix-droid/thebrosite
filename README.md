@@ -65,23 +65,30 @@ Things that are **not** in `data.js` because they are structural copy: hero text
 
 ---
 
-## 4. Connect the enquiry form
+## 4. The enquiry form
 
-The form uses `fetch()` to POST to a form endpoint.
+The form uses `fetch()` to POST to **FormSubmit** (<https://formsubmit.co>), which forwards each enquiry as an email. No account, key or dashboard is involved.
 
-1. Create a free form at <https://formspree.io> (or use any service that accepts a `POST` with `FormData` and returns a 2xx response).
-2. Copy the endpoint URL, e.g. `https://formspree.io/f/abcdwxyz`.
-3. Open `js/main.js` and replace the constant at the very top:
+Deliveries currently go to **godwintext@gmail.com**. The endpoint is set in `js/main.js`:
 
 ```js
-const FORM_ENDPOINT = "https://formspree.io/f/abcdwxyz";
+const FORM_ENDPOINT = "https://formsubmit.co/ajax/godwintext@gmail.com";
 ```
 
-Until this is replaced, the form validates correctly but deliberately does **not** send — it tells visitors the form is not connected and gives them the phone number and email instead. It will never fake a successful submission.
+**One-time activation — required.** FormSubmit emails an "Activate Form" link to that inbox the first time the endpoint is used. An activation email has already been triggered. Until somebody opens it and clicks the link, submissions are accepted by the browser but **not delivered**. Once clicked, delivery is permanent.
 
-The form includes a hidden honeypot field (`company`). If a bot fills it, the submission is dropped silently. No CAPTCHA is used.
+To send enquiries somewhere else, change only `FORM_ENDPOINT` — the handler posts the same `FormData` to whatever URL is there. Any service accepting a `POST` of `FormData` and returning 2xx works.
 
-The states implemented are: field validation (on blur and on submit), loading/spinner, success message, network/server error, and timeout after 15 seconds.
+The handler also sends `_subject`, `_template=table` and `_captcha=false` so emails arrive formatted and without a CAPTCHA step. The honeypot field (`company`) is stripped from the payload before sending.
+
+Guard rails, so the form never lies to a visitor:
+
+- If `FORM_ENDPOINT` is empty, the form refuses to send and shows the phone number and email instead.
+- FormSubmit answers HTTP 200 with `{"success":"false"}` when it rejects a submission (for example, before activation). The handler reads that body and shows the error state rather than claiming success.
+- A hidden honeypot field silently drops bot submissions.
+- 15-second timeout, then a clear failure message with the phone number and email.
+
+States implemented: field validation on blur and on submit, loading spinner, success message, server/network error, and timeout.
 
 ---
 
@@ -154,7 +161,7 @@ These items were **not** supplied or could **not** be verified during this build
 9. **Logo** — replace the placeholder with the official artwork (fully violet, white on violet).
 10. **Photographs** — replace both placeholders with authentic, permission-cleared images. Confirm consent for any identifiable children or adults shown.
 11. **Charity registration** — confirm the registration wording/number in the footer ("Registered charity in Ghana") and add the number if one exists.
-12. **Form endpoint** — set `FORM_ENDPOINT` in `js/main.js` and send a test enquiry.
+12. **Form activation** — the endpoint is wired to FormSubmit and delivering to `godwintext@gmail.com`, but the "Activate Form" email must be clicked once, then a real test enquiry sent from the live site to confirm it arrives.
 13. **Open Graph image** — provide a 1200×630 image and absolute URL.
 14. **Verification note in the Donate section** — remove or update "Details to be verified by the foundation before launch." once verification is complete.
 
@@ -249,7 +256,7 @@ npx wrangler pages deploy . --project-name=thebrosite --branch=main
 
 The site **is live at https://thebrothersfoundation.org**, and the custom-domain attachment is confirmed `status=active` for both the apex and `www`. Verified by direct request: page 200, correct title, canonical and OG tags on the production domain, all 16 assets 200, exactly one analytics beacon with the production token, `http → https` 301, and `www → apex` 301.
 
-What has **not** been done: no formal cross-browser or multi-device test pass, no real enquiry-form submission (the form endpoint is still unset), and no analytics data reviewed yet. Please work through the launch checklist in section 7 before announcing the site.
+What has **not** been done: no formal cross-browser or multi-device test pass, no analytics data reviewed yet, and the enquiry form still needs its one-time FormSubmit activation click plus one real end-to-end enquiry sent from the live site. Please work through the launch checklist in section 7 before announcing the site.
 
 **Important — the old site was replaced.** `thebrothersfoundation.org` previously served the WordPress site hosted on Hostinger. Pointing the domain at Cloudflare Pages superseded it; that WordPress installation still exists at Hostinger and can be restored by reverting the DNS records if needed. The old apex A/AAAA records and the old `www` CNAME target were: `212.1.212.231`, `195.35.60.253`, `2a02:4780:1d:c477:4032:af8b:529c:979d`, `2a02:4780:22:621f:420b:3903:bf52:710c`, and `www.thebrothersfoundation.org.cdn.hstgr.net`.
 
